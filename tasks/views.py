@@ -3,8 +3,9 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from .models import Task
-from .serializers import TaskSerializer
-from users.permissions import IsEmployer
+from .serializers import TaskSerializer,EmployeeTaskSerializer
+from users.permissions import IsEmployer,IsEmployee
+
 
 
 class EmployerTaskListView(APIView):
@@ -101,3 +102,41 @@ class EmployerDeleteTaskView(APIView):
         return Response(
             {"message": "Task deleted successfully!"}, status=status.HTTP_200_OK
         )
+
+
+class EmployeeTaskView(APIView):
+    permission_classes = [IsAuthenticated,IsEmployee]
+
+    def get(self, request):
+        employee = request.user  
+        if employee.role != "EMPLOYEE":
+            return Response(
+                {"error": "You are not authorized to view tasks."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        tasks = Task.objects.filter(assigned_to=employee)
+        serializer = EmployeeTaskSerializer(tasks, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def patch(self, request, pk):
+        employee = request.user
+        if employee.role != "EMPLOYEE":
+            return Response(
+                {"error": "You are not authorized to update tasks."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        try:
+            task = Task.objects.get(id=pk, assigned_to=employee)
+        except Task.DoesNotExist:
+            return Response(
+                {"error": "Task not found or not assigned to you."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        serializer = EmployeeTaskSerializer(task, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

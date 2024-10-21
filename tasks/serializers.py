@@ -40,3 +40,19 @@ class TaskSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data["created_by"] = self.context["request"].user
         return super().create(validated_data)
+
+
+class EmployeeTaskSerializer(serializers.ModelSerializer):
+    assigned_to = serializers.ReadOnlyField(
+        source="assigned_to.phone_number"
+    ) 
+    status = serializers.ChoiceField(choices=Task.STATUS_CHOICES)
+
+    class Meta:
+        model = Task
+        fields = ["id", "title", "description", "status", "assigned_to", "due_date"]
+
+    def validate_status(self, value):
+        if value not in dict(Task.STATUS_CHOICES):
+            raise serializers.ValidationError("Invalid status provided.")
+        return value

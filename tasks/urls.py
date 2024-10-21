@@ -4,6 +4,7 @@ from .views import (
     EmployerCreateTaskView,
     EmployerUpdateTaskView,
     EmployerDeleteTaskView,
+    EmployeeTaskView,
 )
 
 urlpatterns = [
@@ -19,4 +20,8 @@ urlpatterns = [
         EmployerDeleteTaskView.as_view(),
         name="delete-task",
     ),
+    
+    path('tasks/', EmployeeTaskView.as_view(), name='employee-task-list'),  
+    path('tasks/<int:pk>/', EmployeeTaskView.as_view(), name='employee-task-update'),  
+
 ]
