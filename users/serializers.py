@@ -25,7 +25,7 @@ class UserRegistrationSerialiser(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ("phone_number", "password", "role")
+        fields = ("first_name","last_name","phone_number", "password", "role")
 
     def validate_password(self, value):
         if len(value) < 6:
@@ -48,7 +48,7 @@ class UserRegistrationSerialiser(serializers.ModelSerializer):
                 "Password must contain at least one digit."
             )
 
-        if not re.search(r"[@$!%*?&]", value):  # Add your desired special characters
+        if not re.search(r"[@$!%*?&]", value): 
             raise serializers.ValidationError(
                 "Password must contain at least one special character (e.g., @$!%*?&)."
             )

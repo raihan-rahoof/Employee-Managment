@@ -6,6 +6,8 @@ from .managers import CustomBaseUserManager
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     ROLE_CHOICES = [("EMPLOYER", "Employer"), ("EMPLOYEE", "Employee"),("ADMIN","Admin")]
+    first_name = models.CharField(max_length=200,blank=True,null=True)
+    last_name = models.CharField(max_length=200, blank=True, null=True)
     phone_number = models.CharField(max_length=15, unique=True)
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default="EMPLOYEE")
     is_active = models.BooleanField(default=True)
@@ -21,7 +23,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         return f"{self.phone_number} - {self.role}"
 
     def clean(self):
-        """Custom validation logic"""
         if self.role not in dict(self.ROLE_CHOICES):
             raise ValidationError(_("Invalid role for the user"))
 

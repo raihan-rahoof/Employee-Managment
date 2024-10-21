@@ -19,14 +19,29 @@ class UserLoginView(APIView):
                 status=status.HTTP_401_UNAUTHORIZED,
             )
 
-        
         refresh = RefreshToken.for_user(user)
+
+        if user.role == "ADMIN":
+            dashboard_url = "/admin/dashboard/"
+        elif user.role == "EMPLOYER":
+            dashboard_url = "/employer/dashboard/"
+        elif user.role == "EMPLOYEE":
+            dashboard_url = "/employee/dashboard/"
+        else:
+            return Response(
+                {"error": "User role is not recognized"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
 
         return Response(
             {
                 "refresh": str(refresh),
                 "access": str(refresh.access_token),
-                "user": {"phone_number": user.phone_number, "role": user.role},
+                "user": {
+                    "phone_number": user.phone_number,
+                    "role": user.role,
+                    "dashboard_url": dashboard_url, 
+                },
             },
             status=status.HTTP_200_OK,
         )
